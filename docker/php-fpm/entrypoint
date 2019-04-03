@@ -1,0 +1,43 @@
+#!/bin/sh
+
+# Fail on any error
+set -o errexit
+
+# Включение XDEBUG.
+# Entrypoint может запускаться несколько раз. Проверим, что xdebug не конфигирировался при предыдущем запуске.
+if [ "$PHP_XDEBUG_ENABLED" = "1" ] && [ ! -f /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini ] ; then
+    docker-php-ext-enable xdebug
+
+    echo 'xdebug.remote_enable="1"' >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+    echo 'xdebug.remote_port=9000' >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+    echo 'xdebug.profiler_output_dir=/var/www/runtime' >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+    echo 'xdebug.profiler_enable_trigger=1' >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+    echo 'xdebug.profiler_append=1' >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+    echo 'xdebug.profiler_output_name="profiling.out.%t"' >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+
+    # Задание переменной в случае, если она не задана.
+    PHP_XDEBUG_CONNECT_BACK="${PHP_XDEBUG_CONNECT_BACK:-0}"
+
+    # Если адрес для xdebug не установлен и жесткий PHP_XDEBUG_CONNECT_BACK не установлен, то попробуем получить
+    # PHP_XDEBUG_REMOTE из host.docker.internal (работает для Windows & Mac).
+    # Для Windows & Mac единственная возможность достучаться до хостовой машины - host.docker.internal.
+    if [ ! -n "$PHP_XDEBUG_REMOTE" ] && [ "$PHP_XDEBUG_CONNECT_BACK" -ne 1 ] ; then
+        PHP_XDEBUG_REMOTE=`dig host.docker.internal +short`
+    fi
+
+    # Если установлен XDEBUG_REMOTE и жесткий XDEBUG_CONNECT_BACK не установлен, то коннектимся к XDEBUG_REMOTE.
+    if [ -n "$PHP_XDEBUG_REMOTE" ] && [ "$PHP_XDEBUG_CONNECT_BACK" -ne 1 ] ; then
+        echo 'xdebug.remote_connect_back="0"' >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+        echo 'xdebug.remote_host="'$PHP_XDEBUG_REMOTE'"' >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+    else
+        echo 'xdebug.remote_connect_back="1"' >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+    fi
+fi
+
+ln -s /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
+
+chmod 777 runtime/ web/assets
+chmod +x ab/run.sh
+chmod +x yii
+
+docker-php-entrypoint "$@"

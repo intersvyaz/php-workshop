@@ -1,0 +1,41 @@
+version: '2'
+services:
+  db:
+    image: mariadb
+    command: --character-set-server=utf8 --collation-server=utf8_general_ci
+    volumes:
+      - db_data:/var/lib/mysql
+    env_file: .env
+    ports:
+      - 3306
+    restart: always
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - 127.0.0.1:8080:80
+    restart: always
+
+  nginx:
+    build:
+      context: ./docker/nginx
+    ports:
+      - 127.0.0.1:8000:80
+    volumes:
+      - ./:/var/www:delegated
+    depends_on:
+      - php-fpm
+    restart: always
+
+  php-fpm:
+    build:
+      context: ./docker/php-fpm
+    env_file: .env
+    volumes:
+      - ./:/var/www:delegated
+    depends_on:
+      - db
+    restart: always
+
+volumes:
+  db_data:
