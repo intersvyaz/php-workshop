@@ -21,7 +21,12 @@ $config = [
             ],
         ],
         'cache' => [
-            'class' => 'yii\caching\FileCache',
+            'class' => 'yii\redis\Cache',
+        ],
+        'redis' => [
+            'class' => 'yii\redis\Connection',
+            'socketClientFlags' => STREAM_CLIENT_CONNECT | STREAM_CLIENT_PERSISTENT,
+            'hostname' => 'redis',
         ],
         'user' => [
             'identityClass' => 'app\models\User',

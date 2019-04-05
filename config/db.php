@@ -6,4 +6,8 @@ return [
     'username' => getenv('MYSQL_USER'),
     'password' => getenv('MYSQL_PASSWORD'),
     'charset' => 'utf8',
+    'enableSchemaCache' => true,
+    'attributes' => [
+        PDO::ATTR_PERSISTENT => true,
+    ],
 ];

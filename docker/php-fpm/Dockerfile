@@ -9,6 +9,8 @@ RUN docker-php-ext-install pdo_mysql mysqli && \
     pecl install xdebug && \
     curl --silent --show-error https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer --quiet
 
+RUN docker-php-ext-install opcache
+
 COPY entrypoint /usr/local/bin
 
 WORKDIR /var/www

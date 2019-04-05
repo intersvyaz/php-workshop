@@ -37,5 +37,8 @@ services:
       - db
     restart: always
 
+  redis:
+    image: redis:alpine
+
 volumes:
   db_data:
