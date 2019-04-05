@@ -1,9 +1,8 @@
 <?php
 namespace app\models;
 
-use app\models\db\Event;
+use Yii;
 use yii\base\Model;
-use yii\db\Expression;
 
 class SaveEvent extends Model
 {
@@ -36,15 +35,17 @@ class SaveEvent extends Model
             return $this;
         }
 
-        $model = new Event();
+        $result = Yii::$app->db
+            ->createCommand('insert into event (date, counterId, userId, data) values (now(), :p1, :p2, :p3)')
+            ->bindValues([
+                'p1' => $this->counterId,
+                'p2' => $this->userId,
+                'p3' => $this->data,
+            ])
+            ->execute();
 
-        $model->date = new Expression('NOW()');
-        $model->counterId = $this->counterId;
-        $model->userId = $this->userId;
-        $model->data = $this->data;
-
-        if (!$model->save()) {
-            $this->addErrors($model->getErrors());
+        if (!$result) {
+            $this->addErrors('all', 'Не удалось сохранить.');
         }
 
         return $this;
