@@ -12,6 +12,7 @@ RUN docker-php-ext-install pdo_mysql mysqli && \
 RUN docker-php-ext-install opcache
 
 COPY entrypoint /usr/local/bin
+RUN chmod +x /usr/local/bin/entrypoint
 
 WORKDIR /var/www
 
