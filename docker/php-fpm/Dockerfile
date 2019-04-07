@@ -10,6 +10,7 @@ RUN docker-php-ext-install pdo_mysql mysqli && \
     curl --silent --show-error https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer --quiet
 
 COPY entrypoint /usr/local/bin
+RUN chmod +x /usr/local/bin/entrypoint
 
 WORKDIR /var/www
 
