@@ -13,6 +13,7 @@ RUN docker-php-ext-install opcache
 RUN docker-php-ext-install sysvmsg
 
 COPY entrypoint /usr/local/bin
+RUN chmod +x /usr/local/bin/entrypoint
 
 WORKDIR /var/www
 
