@@ -1,7 +1,7 @@
 <?php
 namespace app\models;
 
-use Yii;
+use app\components\Queue;
 use yii\base\Model;
 
 class SaveEvent extends Model
@@ -35,17 +35,17 @@ class SaveEvent extends Model
             return $this;
         }
 
-        $result = Yii::$app->db
-            ->createCommand('insert into event (date, counterId, userId, data) values (now(), :p1, :p2, :p3)')
-            ->bindValues([
-                'p1' => $this->counterId,
-                'p2' => $this->userId,
-                'p3' => $this->data,
-            ])
-            ->execute();
+        $queue = new Queue();
+
+        $result = $queue->push([
+            'date' => time(),
+            'counterId' => $this->counterId,
+            'userId' => $this->userId,
+            'data' => $this->data,
+        ]);
 
         if (!$result) {
-            $this->addErrors('all', 'Не удалось сохранить.');
+            $this->addError('all', 'Не удалось сохранить.');
         }
 
         return $this;

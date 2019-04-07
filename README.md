@@ -18,6 +18,10 @@
 
 ```docker-compose up -d```
 
+Запуск обработчика очереди:
+
+```docker-compose exec php-fpm ./yii worker/run```
+
 
 Ссылка на рабочий проект: http://127.0.0.1:8000/
 
